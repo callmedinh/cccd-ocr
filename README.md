@@ -54,9 +54,10 @@ python gui.py
 
 Trình duyệt tự mở tại `http://127.0.0.1:8765`.
 
-1. **Kéo nhiều ảnh một lúc** vào khung, hoặc bấm *chọn tệp*, hoặc dán bằng `Ctrl+V`.
-2. Ảnh rơi vào cột **Chưa rõ mặt**. Kéo từng ảnh sang **Mặt trước** hoặc
-   **Mặt sau** — hoặc thả thẳng ảnh vào đúng cột ngay từ đầu.
+1. Bấm **＋ Thêm ảnh** để chọn nhiều tệp, hoặc **kéo ảnh thả vào bất kỳ đâu trên
+   trang**, hoặc dán bằng `Ctrl+V`.
+2. Ảnh rơi vào cột **Chưa rõ mặt**. Kéo từng ảnh sang **Mặt trước** / **Mặt sau**
+   nếu muốn chỉ định — hoặc thả thẳng ảnh vào đúng cột ngay từ đầu.
 3. Bấm **Bắt đầu quét** (hoặc `Ctrl+Enter`).
 4. Bảng kết quả hiện ra: **bấm vào ô nào cũng sửa được** trước khi tải.
 5. Bấm **Tải Excel** hoặc **Tải CSV**.
@@ -68,10 +69,11 @@ Những điểm đáng chú ý:
   *i* ↔ mặt sau thứ *i*).
 - Ô **Tự ghép mặt trước/sau**: bật (mặc định) thì mỗi công dân là một dòng, gộp cả
   hai mặt; tắt thì mỗi ảnh thành một dòng riêng.
-- Ảnh ở cột *Chưa rõ mặt* vẫn được máy tự đoán mặt trước / mặt sau khi quét.
+- Ảnh ở cột *Chưa rõ mặt* vẫn được máy tự đoán mặt trước / mặt sau khi quét — nên
+  cách nhanh nhất là thả cả lo ảnh của mọi người vào một lượt rồi bấm quét.
 - Ô **Đọc kỹ**: đọc thêm biến thể ảnh, chậm hơn nhưng tốt hơn với thẻ mờ/nghiêng.
 - **Refresh trang không mất dữ liệu** — phiên làm việc được khôi phục.
-- Rê chuột vào ảnh: `×` để bỏ ảnh, `⤢` để mở ảnh gốc trong tab mới.
+- Rê chuột vào ảnh: `⇄` đổi mặt, `⤢` mở ảnh gốc, `×` bỏ ảnh.
 - Cột **#** hiện huy hiệu `2 mặt` cho những dòng đã gộp cả hai mặt; rê chuột vào
   dòng để xem tên hai tệp nguồn.
 - Toàn bộ máy chủ chỉ lắng nghe `127.0.0.1`. Đổi cổng: `python gui.py --port 9000`.

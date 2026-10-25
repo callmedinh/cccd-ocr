@@ -93,6 +93,15 @@ h1, h2 { margin: 0; font-weight: 650; }
 }
 .btn.ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .24); }
 
+/* Nút hành động chính: xanh lá để tách khỏi nút "Thêm ảnh" màu trắng */
+.btn.accent {
+  background: #1b9e5a;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(27, 158, 90, .35);
+}
+.btn.accent:hover:not(:disabled) { background: #17834b; }
+.btn.accent:disabled { background: rgba(255, 255, 255, .22); box-shadow: none; }
+
 .results .btn.primary { background: var(--navy); color: #fff; }
 .results .btn.primary:hover:not(:disabled) { background: var(--navy-dark); }
 .results .btn.secondary { background: #fff; color: var(--navy); border-color: var(--border); }
@@ -125,41 +134,29 @@ h1, h2 { margin: 0; font-weight: 650; }
 
 /* -------------------------------------------------------------------- main */
 
-main { padding: 22px 26px 60px; max-width: 1720px; margin: 0 auto; }
+main { padding: 18px 26px 60px; max-width: 1720px; margin: 0 auto; }
 
-/* ---------------------------------------------------------------- dropzone */
-
-.dropzone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 26px 20px;
-  margin-bottom: 20px;
-  border: 2px dashed #b9c6d6;
-  border-radius: var(--radius);
+.page-hint {
+  margin: 0 0 16px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  border-radius: 10px;
   background: var(--surface);
-  text-align: center;
-  transition: border-color .15s ease, background .15s ease;
-  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
 }
-.dropzone:hover, .dropzone:focus-visible, .dropzone.is-over {
-  border-color: var(--navy);
-  background: #eef4fb;
-  outline: none;
+.page-hint strong { color: var(--navy); }
+.page-hint kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #f7f9fc;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text);
 }
-.dz-icon {
-  width: 34px; height: 34px;
-  stroke: var(--navy);
-  stroke-width: 1.8;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  margin-bottom: 4px;
-}
-.dz-title { margin: 0; font-size: 17px; font-weight: 650; }
-.dz-sub { margin: 0; color: var(--muted); }
-.dz-hint { margin: 6px 0 0; font-size: 12.5px; color: #93a0b0; }
 
 /* ----------------------------------------------------------------- columns */
 
@@ -211,7 +208,7 @@ main { padding: 22px 26px 60px; max-width: 1720px; margin: 0 auto; }
   min-height: 92px;
 }
 .cards:empty::after {
-  content: "Kéo ảnh vào đây";
+  content: "Chưa có ảnh";
   grid-column: 1 / -1;
   display: grid;
   place-items: center;

@@ -12,9 +12,8 @@
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
   const els = {
-    dropzone: $("#dropzone"),
     fileInput: $("#file-input"),
-    pick: $("#btn-pick"),
+    add: $("#btn-add"),
     scan: $("#btn-scan"),
     reset: $("#btn-reset"),
     auto: $("#opt-auto"),
@@ -264,7 +263,7 @@
     function hideOverlay() {
       clearTimeout(hideTimer);
       els.overlay.hidden = true;
-      $$(".column.is-over, .dropzone.is-over").forEach((el) => el.classList.remove("is-over"));
+      $$(".column.is-over").forEach((el) => el.classList.remove("is-over"));
     }
 
     function carriesFiles(event) {
@@ -309,7 +308,7 @@
     });
 
     // Cho phép thả lên từng cột
-    $$(".column, .dropzone").forEach((zone) => {
+    $$(".column").forEach((zone) => {
       zone.addEventListener("dragover", (event) => {
         const data = event.dataTransfer;
         if (!data) return;
@@ -527,11 +526,7 @@
   }
 
   function bind() {
-    els.pick.addEventListener("click", (event) => {
-      event.stopPropagation();
-      els.fileInput.click();
-    });
-    els.dropzone.addEventListener("click", () => els.fileInput.click());
+    els.add.addEventListener("click", () => els.fileInput.click());
     els.fileInput.addEventListener("change", () => {
       if (els.fileInput.files.length) addFiles(els.fileInput.files, "");
       els.fileInput.value = "";
