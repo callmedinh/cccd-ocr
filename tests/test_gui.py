@@ -250,6 +250,41 @@ class TestPairByOrder(unittest.TestCase):
         merged = group_records([front])
         self.assertEqual(len(merged), 1)
 
+    def test_identified_front_absorbs_unidentified_back(self):
+        """Mặt trước đọc được số CCCD, mặt sau mờ không đọc được -> vẫn phải ghép."""
+        front = CardRecord(id_number="001095012345", full_name="NGUYỄN VĂN AN")
+        front.side = "front"
+        back = CardRecord(date_of_issue="20/06/2021")
+        back.side = "back"
+        back.personal_identification = "Sẹo mờ"
+
+        merged = group_records([front, back])
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0].id_number, "001095012345")
+        self.assertEqual(merged[0].date_of_issue, "20/06/2021")
+
+    def test_ambiguous_loose_back_is_not_guessed(self):
+        """3 mặt trước có số + 1 mặt sau mờ: không đoán bừa, để riêng."""
+        fronts = []
+        for index in range(3):
+            record = CardRecord(id_number=f"00109501234{index}", full_name=f"NGƯỜI {index}")
+            record.side = "front"
+            fronts.append(record)
+        back = CardRecord(personal_identification="Sẹo mờ")
+        back.side = "back"
+
+        merged = group_records([*fronts, back])
+        self.assertEqual(len(merged), 4)
+        self.assertTrue(all(not record.date_of_issue for record in merged))
+
+    def test_merge_disabled_keeps_every_image(self):
+        front = CardRecord(id_number="001095012345", full_name="A")
+        front.side = "front"
+        back = CardRecord(id_number="001095012345", date_of_issue="20/06/2021")
+        back.side = "back"
+        merged = group_records([front, back], merge=False)
+        self.assertEqual(len(merged), 2)
+
     def test_records_with_same_id_merge_even_without_sides(self):
         a = CardRecord(id_number="001095012345", full_name="A")
         b = CardRecord(id_number="001095012345", date_of_issue="01/01/2022")

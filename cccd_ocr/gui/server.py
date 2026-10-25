@@ -190,7 +190,7 @@ class _Handler(BaseHTTPRequestHandler):
             thorough=bool(payload.get("thorough")),
             variants=not bool(payload.get("fast")),
         )
-        self.session.start_scan(items, options)
+        self.session.start_scan(items, options, merge=bool(payload.get("merge", True)))
         self._send_json({"ok": True, "total": self.session.total})
 
     def api_export(self) -> None:

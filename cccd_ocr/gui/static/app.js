@@ -147,6 +147,19 @@
     });
     card.appendChild(remove);
 
+    if (item.remote) {
+      const view = document.createElement("button");
+      view.className = "view";
+      view.type = "button";
+      view.textContent = "⤢";
+      view.title = "Xem ảnh gốc";
+      view.addEventListener("click", (event) => {
+        event.stopPropagation();
+        window.open(`/api/image/${item.id}`, "_blank", "noopener");
+      });
+      card.appendChild(view);
+    }
+
     card.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", item.id);
       event.dataTransfer.effectAllowed = "move";
@@ -297,10 +310,8 @@
 
     try {
       await postJson("/api/scan", {
-        items: ready.map((item) => ({
-          id: item.id,
-          side: els.auto.checked ? item.side : (item.side || "front"),
-        })),
+        items: ready.map((item) => ({ id: item.id, side: item.side })),
+        merge: els.auto.checked,
         thorough: els.thorough.checked,
       });
       poll();
@@ -371,7 +382,11 @@
 
       const stt = document.createElement("td");
       stt.className = "col-stt";
-      stt.textContent = String(index + 1);
+      const sources = row.sources || [];
+      stt.innerHTML = sources.length > 1
+        ? `${index + 1}<span class="src-badge" title="${sources.join(' + ')}">2 mặt</span>`
+        : String(index + 1);
+      tr.title = sources.length ? `Nguồn: ${sources.join(" + ")}` : "";
       tr.appendChild(stt);
 
       COLUMNS.forEach(([field, label]) => {

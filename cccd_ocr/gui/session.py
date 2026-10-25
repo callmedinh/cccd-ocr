@@ -110,7 +110,8 @@ class Session:
             upload.side = side
 
     # ---------------------------------------------------------------- quét
-    def start_scan(self, items: list[tuple[str, str]], options: OcrOptions) -> None:
+    def start_scan(self, items: list[tuple[str, str]], options: OcrOptions,
+                   *, merge: bool = True) -> None:
         """Chạy quét trong luồng nền; ``items`` là [(upload_id, side)]."""
         if self.running:
             raise RuntimeError("Đang quét, vui lòng đợi")
@@ -126,12 +127,12 @@ class Session:
         self.error = ""
         self.current = ""
         self.started_at = time.time()
-        thread = threading.Thread(target=self._scan_worker, args=(selected, options),
-                                  daemon=True)
+        thread = threading.Thread(target=self._scan_worker,
+                                  args=(selected, options, merge), daemon=True)
         thread.start()
 
     def _scan_worker(self, selected: list[tuple[Upload, str]],
-                     options: OcrOptions) -> None:
+                     options: OcrOptions, merge: bool = True) -> None:
         try:
             engine = OcrEngine(options)
             _ = engine.backend  # nạp backend, báo lỗi sớm
@@ -144,7 +145,7 @@ class Session:
                 records.append(record)
                 self.done += 1
 
-            for record in group_records(records):
+            for record in group_records(records, merge=merge):
                 self.rows.append(row_from_record(record))
         except Exception as error:
             _LOGGER.exception("Quét thất bại")

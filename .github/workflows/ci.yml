@@ -33,6 +33,9 @@ jobs:
           # bản headless để không cần libGL/GUI trên runner
           pip install opencv-python-headless numpy pillow openpyxl ruff
 
+      - name: Tải bộ dữ liệu tiếng Việt (tessdata_best, giống bản phát hành)
+        run: python tools/get_models.py
+
       - name: Kiểm tra mã nguồn
         run: python -m ruff check .
 

@@ -44,53 +44,93 @@ def collect_images(inputs: list[str]) -> list[Path]:
     return unique
 
 
-def group_records(records: list[CardRecord]) -> list[CardRecord]:
+def group_records(records: list[CardRecord], *, merge: bool = True) -> list[CardRecord]:
     """Gộp mặt trước và mặt sau thành một dòng cho mỗi công dân.
 
-    Có hai lượt ghép:
+    Ba lượt ghép, theo thứ tự chắc chắn giảm dần:
 
     1. **Theo số CCCD** — chắc chắn nhất, chỉ cần một trong hai mặt đọc được số.
-    2. **Theo thứ tự** — dành cho các ảnh không đọc ra số: mặt trước thứ *i* ghép
-       với mặt sau thứ *i*. Nhờ vậy người dùng chỉ cần kéo ảnh vào đúng cột
-       "Mặt trước" / "Mặt sau" là ghép được cặp, không phải đặt tên tệp.
+    2. **Theo thứ tự trong nhóm chưa có số** — mặt trước thứ *i* ghép với mặt sau
+       thứ *i* (người dùng đã kéo ảnh vào đúng cột).
+    3. **Bù mặt còn thiếu cho nhóm đã có số** — chỉ làm khi số mặt trước và số mặt
+       sau còn lại bằng nhau, vì ghép nhầm người này sang người khác còn tệ hơn
+       là để riêng.
+
+    ``merge=False`` giữ mỗi ảnh thành một dòng riêng (người dùng tắt ghép cặp).
     """
-    by_id: dict[str, CardRecord] = {}
+    if not merge:
+        for record in records:
+            _final_check(record)
+        return list(records)
+
+    groups: dict[str, CardRecord] = {}
+    order: list[str] = []
     loose: list[CardRecord] = []
     for record in records:
         if not record.id_number:
             loose.append(record)
             continue
-        existing = by_id.get(record.id_number)
+        existing = groups.get(record.id_number)
         if existing is None:
-            by_id[record.id_number] = record
+            groups[record.id_number] = record
+            order.append(record.id_number)
         else:
             existing.merge_from(record)
 
-    merged = list(by_id.values())
-    merged.extend(_pair_by_order(loose))
+    identified = [groups[key] for key in order]
+    remaining_fronts = [r for r in loose if r.side == "front"]
+    remaining_backs = [r for r in loose if r.side == "back"]
+    others = [r for r in loose if r.side not in ("front", "back")]
+
+    # (2) ghép trong nhóm chưa có số CCCD
+    leftovers: list[CardRecord] = []
+    paired = min(len(remaining_fronts), len(remaining_backs))
+    for index in range(paired):
+        leftovers.append(_merge_pair(remaining_fronts[index], remaining_backs[index]))
+    remaining_fronts = remaining_fronts[paired:]
+    remaining_backs = remaining_backs[paired:]
+
+    # (3) bù mặt còn thiếu cho nhóm đã có số CCCD — chỉ khi 1:1
+    remaining_backs = _attach(identified, remaining_backs, side="back")
+    remaining_fronts = _attach(identified, remaining_fronts, side="front")
+
+    merged = identified + leftovers + remaining_fronts + remaining_backs + others
     for record in merged:
         _final_check(record)
     return merged
 
 
-def _pair_by_order(records: list[CardRecord]) -> list[CardRecord]:
-    """Ghép các bản ghi chưa có số CCCD: mặt trước *i* ↔ mặt sau *i*."""
-    fronts = [r for r in records if r.side == "front"]
-    backs = [r for r in records if r.side == "back"]
-    others = [r for r in records if r.side not in ("front", "back")]
+def _has_side(record: CardRecord, side: str) -> bool:
+    """Bản ghi đã có thông tin của mặt này chưa (dựa vào trường đặc trưng)."""
+    if record.side == side:
+        return True
+    if side == "front":
+        return bool(record.full_name or record.place_of_residence)
+    return bool(record.date_of_issue or record.personal_identification)
 
-    result: list[CardRecord] = []
-    paired = 0
-    for front, back in zip(fronts, backs, strict=False):
-        base = front if _filled(front) >= _filled(back) else back
-        base.merge_from(back if base is front else front)
-        result.append(base)
-        paired += 1
 
-    result.extend(fronts[paired:])
-    result.extend(backs[paired:])
-    result.extend(others)
-    return result
+def _attach(identified: list[CardRecord], pool: list[CardRecord], *,
+            side: str) -> list[CardRecord]:
+    """Ghép các bản ghi lẻ vào nhóm đã có số CCCD còn thiếu mặt ``side``.
+
+    Chỉ ghép khi hai bên cùng số lượng — lúc đó thứ tự là manh mối duy nhất và
+    cũng là manh mối đáng tin (người dùng kéo ảnh vào cùng một lượt).
+    """
+    if not pool:
+        return pool
+    targets = [record for record in identified if not _has_side(record, side)]
+    if len(targets) != len(pool):
+        return pool  # không cân -> để riêng, không đoán bừa
+    for target, extra in zip(targets, pool, strict=False):
+        target.merge_from(extra)
+    return []
+
+
+def _merge_pair(first: CardRecord, second: CardRecord) -> CardRecord:
+    """Gộp hai bản ghi cùng một người, giữ bản đầy đủ hơn làm gốc."""
+    base = first if _filled(first) >= _filled(second) else second
+    base.merge_from(second if base is first else first)
+    return base
 
 
 def _filled(record: CardRecord) -> int:
