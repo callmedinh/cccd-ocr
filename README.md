@@ -1,5 +1,6 @@
 # CCCD OCR — quét ảnh Căn cước công dân ra Excel
 
+[![CI](https://github.com/callmedinh/cccd-ocr/actions/workflows/ci.yml/badge.svg)](https://github.com/callmedinh/cccd-ocr/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-1f4e79)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-1b7f4b)](LICENSE)
 [![Offline](https://img.shields.io/badge/ch%E1%BA%A1y-offline-b3261e)](#6-gi%E1%BB%9Bi-h%E1%BA%A1n)
@@ -65,10 +66,14 @@ Những điểm đáng chú ý:
 - Thả ảnh vào đúng cột là đủ để ghép cặp — không cần đặt tên tệp. Cặp được ghép
   theo số CCCD; nếu ảnh mờ không đọc được số thì ghép theo thứ tự (mặt trước thứ
   *i* ↔ mặt sau thứ *i*).
-- Ô **Tự nhận biết mặt**: bật thì những ảnh còn ở cột *Chưa rõ mặt* sẽ được máy
-  tự đoán mặt trước / mặt sau.
+- Ô **Tự ghép mặt trước/sau**: bật (mặc định) thì mỗi công dân là một dòng, gộp cả
+  hai mặt; tắt thì mỗi ảnh thành một dòng riêng.
+- Ảnh ở cột *Chưa rõ mặt* vẫn được máy tự đoán mặt trước / mặt sau khi quét.
+- Ô **Đọc kỹ**: đọc thêm biến thể ảnh, chậm hơn nhưng tốt hơn với thẻ mờ/nghiêng.
 - **Refresh trang không mất dữ liệu** — phiên làm việc được khôi phục.
-- Rê chuột vào ảnh rồi bấm `×` để bỏ ảnh đó.
+- Rê chuột vào ảnh: `×` để bỏ ảnh, `⤢` để mở ảnh gốc trong tab mới.
+- Cột **#** hiện huy hiệu `2 mặt` cho những dòng đã gộp cả hai mặt; rê chuột vào
+  dòng để xem tên hai tệp nguồn.
 - Toàn bộ máy chủ chỉ lắng nghe `127.0.0.1`. Đổi cổng: `python gui.py --port 9000`.
 
 ---
@@ -236,9 +241,10 @@ chỉ họ tên và địa chỉ là mất dấu.
 python -m unittest discover -s tests -v
 ```
 
-54 bài kiểm thử: giải mã MRZ và check digit, chuẩn hoá ngày/giới tính, cấu trúc số
-CCCD, bóc tách theo nhãn (không cần OCR), ghi Excel/CSV, ghép cặp mặt trước–sau,
-và một bài tích hợp dựng máy chủ GUI thật rồi upload → quét → xuất file.
+57 bài kiểm thử: giải mã MRZ và check digit, chuẩn hoá ngày/giới tính, cấu trúc số
+CCCD, bóc tách theo nhãn (không cần OCR), ghi Excel/CSV, ghép cặp mặt trước–sau
+(kể cả trường hợp mặt sau mờ không đọc ra số), và một bài tích hợp dựng máy chủ GUI
+thật rồi upload → quét → xuất file.
 
 ```powershell
 python tools/debug_one.py samples/01_001095012345_mat_truoc.jpg   # xem OCR thô
@@ -268,7 +274,7 @@ cccd_ocr/
   console.py                    ép console Windows in được tiếng Việt
   gui/                          máy chủ HTTP + trang kéo-thả (HTML/CSS/JS thuần)
 tools/                          debug_one.py, make_samples.py, get_models.py
-tests/                          test_cccd.py, test_gui.py (54 bài)
+tests/                          test_cccd.py, test_gui.py (57 bài)
 models/tessdata/                vie.traineddata + configs của Tesseract
 samples/                        ảnh mẫu — toàn bộ dữ liệu hư cấu
 ```
