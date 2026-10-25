@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ruff_cache/
+
+# Kết quả chạy
+output/
+debug_*.txt
+
+# Bộ dữ liệu Tesseract tải về (tạo lại bằng: python tools/get_models.py)
+models/tessdata/*.traineddata
+models/tessdata/configs/
+
+.DS_Store
+Thumbs.db

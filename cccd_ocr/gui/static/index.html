@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CCCD OCR — quét Căn cước công dân</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%231f4e79'/><text x='50' y='68' font-size='46' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>ID</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">CCCD</div>
+    <div class="brand-text">
+      <h1>Quét Căn cước công dân</h1>
+      <p>Kéo ảnh vào, chọn mặt trước / mặt sau, tải về Excel.</p>
+    </div>
+  </div>
+  <div class="toolbar">
+    <label class="switch" title="Tự nhận biết ảnh nào là mặt trước, mặt sau">
+      <input type="checkbox" id="opt-auto" checked>
+      <span>Tự nhận biết mặt</span>
+    </label>
+    <label class="switch" title="Đọc kỹ hơn, chậm hơn khoảng 3 lần">
+      <input type="checkbox" id="opt-thorough">
+      <span>Đọc kỹ</span>
+    </label>
+    <button id="btn-scan" class="btn primary" disabled>Bắt đầu quét</button>
+    <button id="btn-reset" class="btn ghost" disabled>Làm lại</button>
+  </div>
+</header>
+
+<main>
+  <section id="dropzone" class="dropzone" tabindex="0">
+    <svg viewBox="0 0 24 24" class="dz-icon" aria-hidden="true">
+      <path d="M12 16V4m0 0L8 8m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+    </svg>
+    <p class="dz-title">Kéo ảnh CCCD vào đây</p>
+    <p class="dz-sub">hoặc <button type="button" id="btn-pick" class="link">bấm để chọn tệp</button> · dán bằng Ctrl+V cũng được</p>
+    <p class="dz-hint">Nhận jpg, png, bmp, webp, tif — chọn được nhiều ảnh cùng lúc</p>
+    <input type="file" id="file-input" accept="image/*" multiple hidden>
+  </section>
+
+  <section class="columns">
+    <article class="column" data-side="front">
+      <header>
+        <h2>Mặt trước</h2>
+        <span class="count" data-count="front">0</span>
+      </header>
+      <p class="column-hint">Số CCCD, họ tên, ngày sinh, quê quán…</p>
+      <div class="cards" data-list="front"></div>
+    </article>
+
+    <article class="column" data-side="back">
+      <header>
+        <h2>Mặt sau</h2>
+        <span class="count" data-count="back">0</span>
+      </header>
+      <p class="column-hint">Ngày cấp, đặc điểm nhận dạng, MRZ…</p>
+      <div class="cards" data-list="back"></div>
+    </article>
+
+    <article class="column" data-side="">
+      <header>
+        <h2>Chưa rõ mặt</h2>
+        <span class="count" data-count="">0</span>
+      </header>
+      <p class="column-hint">Ứng dụng sẽ tự đoán khi quét</p>
+      <div class="cards" data-list=""></div>
+    </article>
+  </section>
+
+  <section id="progress" class="progress-card" hidden>
+    <div class="progress-head">
+      <strong id="progress-label">Đang quét…</strong>
+      <span id="progress-count" class="muted"></span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+    <p id="progress-current" class="muted small"></p>
+  </section>
+
+  <section id="results" class="results" hidden>
+    <div class="results-head">
+      <h2>Kết quả <span id="result-count" class="muted"></span></h2>
+      <div class="toolbar">
+        <span class="muted small">Bấm vào ô để sửa trước khi tải</span>
+        <button id="btn-xlsx" class="btn primary">Tải Excel</button>
+        <button id="btn-csv" class="btn secondary">Tải CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="result-table">
+        <thead>
+          <tr>
+            <th class="col-stt">#</th>
+            <th data-field="id_number">Số CCCD</th>
+            <th data-field="full_name">Họ và tên</th>
+            <th data-field="date_of_birth">Ngày sinh</th>
+            <th data-field="sex">Giới tính</th>
+            <th data-field="nationality">Quốc tịch</th>
+            <th data-field="place_of_origin">Quê quán</th>
+            <th data-field="place_of_residence">Nơi thường trú</th>
+            <th data-field="date_of_issue">Ngày cấp</th>
+            <th data-field="date_of_expiry">Có giá trị đến</th>
+            <th data-field="personal_identification">Đặc điểm nhận dạng</th>
+            <th data-field="issue_authority">Nơi cấp</th>
+            <th class="col-conf">Tin cậy</th>
+            <th class="col-warn">Cảnh báo</th>
+          </tr>
+        </thead>
+        <tbody id="result-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+<div id="drop-overlay" class="drop-overlay" hidden><span>Thả ảnh vào đây</span></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
