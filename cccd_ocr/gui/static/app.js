@@ -136,20 +136,24 @@
     name.textContent = item.name;
     card.appendChild(name);
 
-    const remove = document.createElement("button");
-    remove.className = "remove";
-    remove.type = "button";
-    remove.textContent = "×";
-    remove.title = "Bỏ ảnh này";
-    remove.addEventListener("click", (event) => {
+    const tools = document.createElement("div");
+    tools.className = "tools";
+
+    const flip = document.createElement("button");
+    flip.className = "tool flip";
+    flip.type = "button";
+    flip.textContent = "⇄";
+    flip.title = "Đổi mặt: chưa rõ → mặt trước → mặt sau";
+    flip.addEventListener("click", (event) => {
       event.stopPropagation();
-      removeItem(item.id);
+      const order = ["", "front", "back"];
+      moveItem(item.id, order[(order.indexOf(item.side) + 1) % order.length]);
     });
-    card.appendChild(remove);
+    tools.appendChild(flip);
 
     if (item.remote) {
       const view = document.createElement("button");
-      view.className = "view";
+      view.className = "tool view";
       view.type = "button";
       view.textContent = "⤢";
       view.title = "Xem ảnh gốc";
@@ -157,8 +161,21 @@
         event.stopPropagation();
         window.open(`/api/image/${item.id}`, "_blank", "noopener");
       });
-      card.appendChild(view);
+      tools.appendChild(view);
     }
+
+    const remove = document.createElement("button");
+    remove.className = "tool remove";
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.title = "Bỏ ảnh này";
+    remove.addEventListener("click", (event) => {
+      event.stopPropagation();
+      removeItem(item.id);
+    });
+    tools.appendChild(remove);
+
+    card.appendChild(tools);
 
     card.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", item.id);
@@ -233,37 +250,53 @@
   // ------------------------------------------------------------ kéo & thả
 
   function setupDragAndDrop() {
-    let dragDepth = 0;
+    // Đếm dragenter/dragleave rất dễ lệch (mỗi phần tử con bắn một sự kiện),
+    // làm lớp phủ mờ bị kẹt lại và che cả trang. Dùng hẹn giờ: còn nhận được
+    // dragover thì còn hiện, im lặng 150ms thì tự ẩn.
+    let hideTimer = null;
 
-    ["dragenter", "dragover"].forEach((type) => {
-      document.addEventListener(type, (event) => {
-        if (!event.dataTransfer || !Array.from(event.dataTransfer.types).includes("Files")) {
-          return;
-        }
-        event.preventDefault();
-        if (type === "dragenter") dragDepth += 1;
-        els.overlay.hidden = false;
-      });
+    function showOverlay() {
+      els.overlay.hidden = false;
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(hideOverlay, 150);
+    }
+
+    function hideOverlay() {
+      clearTimeout(hideTimer);
+      els.overlay.hidden = true;
+      $$(".column.is-over, .dropzone.is-over").forEach((el) => el.classList.remove("is-over"));
+    }
+
+    function carriesFiles(event) {
+      return Boolean(event.dataTransfer)
+        && Array.from(event.dataTransfer.types).includes("Files");
+    }
+
+    document.addEventListener("dragover", (event) => {
+      if (!carriesFiles(event)) return;
+      event.preventDefault();
+      showOverlay();
+    });
+
+    document.addEventListener("dragenter", (event) => {
+      if (!carriesFiles(event)) return;
+      event.preventDefault();
+      showOverlay();
     });
 
     document.addEventListener("dragleave", (event) => {
-      if (!event.dataTransfer || !Array.from(event.dataTransfer.types).includes("Files")) {
-        return;
-      }
-      dragDepth = Math.max(0, dragDepth - 1);
-      if (dragDepth === 0) {
-        els.overlay.hidden = true;
-        $$(".column.is-over, .dropzone.is-over").forEach((el) => el.classList.remove("is-over"));
-      }
+      if (!carriesFiles(event)) return;
+      // relatedTarget null = đã ra khỏi cửa sổ trình duyệt
+      if (event.relatedTarget === null) hideOverlay();
     });
+
+    document.addEventListener("dragend", hideOverlay);
 
     document.addEventListener("drop", (event) => {
       const files = event.dataTransfer && event.dataTransfer.files;
       const internalId = event.dataTransfer && event.dataTransfer.getData("text/plain");
       event.preventDefault();
-      dragDepth = 0;
-      els.overlay.hidden = true;
-      $$(".column.is-over, .dropzone.is-over").forEach((el) => el.classList.remove("is-over"));
+      hideOverlay();
 
       const zone = event.target.closest("[data-side]");
       const side = zone ? zone.dataset.side : "";
@@ -275,13 +308,13 @@
       }
     });
 
-    // Thả thẻ giữa các cột
+    // Cho phép thả lên từng cột
     $$(".column, .dropzone").forEach((zone) => {
       zone.addEventListener("dragover", (event) => {
         const data = event.dataTransfer;
         if (!data) return;
-        const internal = Array.from(data.types).includes("text/plain");
-        if (!internal && !Array.from(data.types).includes("Files")) return;
+        const types = Array.from(data.types);
+        if (!types.includes("text/plain") && !types.includes("Files")) return;
         event.preventDefault();
         zone.classList.add("is-over");
       });
