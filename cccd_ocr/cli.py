@@ -224,8 +224,34 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+WELCOME = """\
+CCCD OCR — quét ảnh Căn cước công dân ra Excel.
+
+Bạn chưa chọn ảnh nào. Có hai cách dùng:
+
+  1) Giao diện kéo-thả (dễ nhất):
+
+         python gui.py
+
+     Trình duyệt tự mở, kéo ảnh vào, chọn mặt trước / mặt sau, tải Excel.
+
+  2) Dòng lệnh:
+
+         python main.py <thư mục ảnh> -o ket_qua.xlsx --csv
+
+     Ví dụ:  python main.py samples/ -o output/cccd.xlsx --csv
+
+Xem đầy đủ tuỳ chọn:  python main.py --help
+"""
+
+
 def main(argv: list[str] | None = None) -> int:
     ensure_utf8_console()
+    raw_args = sys.argv[1:] if argv is None else argv
+    if not raw_args:
+        print(WELCOME)
+        return 0
+
     args = build_parser().parse_args(argv)
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
 
