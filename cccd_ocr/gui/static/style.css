@@ -107,17 +107,6 @@ h1, h2 { margin: 0; font-weight: 650; }
 .results .btn.secondary { background: #fff; color: var(--navy); border-color: var(--border); }
 .results .btn.secondary:hover:not(:disabled) { background: #eef4fb; }
 
-.link {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--navy);
-  font: inherit;
-  font-weight: 650;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .switch {
   display: inline-flex;
   gap: 7px;
